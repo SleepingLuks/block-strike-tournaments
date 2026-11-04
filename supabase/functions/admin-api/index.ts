@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const secretKey = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const secretKey = Deno.env.get("PROJECT_SECRET_KEY") || Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const bootstrapUsername = Deno.env.get("INITIAL_ADMIN_USERNAME");
   const bootstrapPassword = Deno.env.get("INITIAL_ADMIN_PASSWORD");
   if (!supabaseUrl || !secretKey) {
