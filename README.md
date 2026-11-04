@@ -4,36 +4,40 @@ Responsive static frontend for the Block Strike community tournament platform.
 
 ## Pages
 - `index.html` — homepage and tournament format overview.
-- `tournaments.html` — tournament directory with format/status filters and results archive.
-- `tournament.html` — reusable tournament detail template: overview, participants, matches, bracket and standings.
-- `admin.html` — admin workspace layout for tournament creation, player management, match scores and administrator roles.
-- `style.css` — shared responsive black/red design.
-- `script.js` — Russian/English interface language switch and basic UI interactions.
-- `database.js` — public read-only Supabase integration for the homepage, tournament directory and tournament details.
+- `tournaments.html` — tournament directory with format/status filters.
+- `tournament.html` — tournament details, participants, matches, bracket and standings.
+- `admin.html` — private administrator login and moderator account management.
+- `admin.js` — browser-side admin interface; no passwords or service keys are committed.
+- `database.js` — public read-only Supabase integration.
 
-## Publish with GitHub Pages
-Repository Settings → Pages → Deploy from a branch → `main` → `/ (root)`.
+## Hosting
+Publish the static site with GitHub Pages: repository Settings → Pages → Deploy from a branch → `main` → `/ (root)`.
 
-## Important implementation status
-The public pages intentionally start empty. No fake tournaments, players, scores or demo brackets are included. The admin form is disabled until a real backend is connected.
+## Supabase setup
+Project URL: `https://cmnkimnhogeatciffpkm.supabase.co`.
 
-This repository is a static frontend connected to Supabase for public tournament reads. The homepage, tournament directory and tournament detail page load published tournament data from the database. Admin writes, Telegram login, server-side Telegram signature validation, administrator allowlisting/roles, bracket generation and score management are NOT implemented yet. Do not treat the visual admin page as an authenticated admin system.
+The browser uses only the Supabase publishable key. Never put the Supabase secret key in frontend files or commit it to GitHub.
 
-## Planned backend
-Supabase project: `https://cmnkimnhogeatciffpkm.supabase.co`. The browser uses the publishable key in `database.js`; RLS policies restrict it to public read access. Never place the Supabase secret key in frontend files. Use trusted server-side endpoints. Telegram authentication must validate the Telegram payload hash on the server. Main administrator privileges must be assigned from trusted configuration/database state, never from client-side values.
+### Database migration
+1. Keep the original tournament schema already created in Supabase.
+2. Open Supabase → SQL Editor.
+3. Run `supabase/migrations/202611040002_username_admin_accounts.sql`.
+4. This creates a separate private `admin_accounts` table and server-side sessions. It leaves tournament/player data intact. It replaces the previous Telegram-linked admin session table.
 
-Tournament formats:
-- Single Elimination: knockout bracket.
-- Swiss System: configurable rounds and standings-based pairings. Confirm scoring/draw policy before implementing tournament logic.
+### First administrator
+In Supabase Dashboard → Edge Functions → Secrets, add:
+- `INITIAL_ADMIN_USERNAME` — first administrator login (3–24 lowercase Latin letters, digits or underscore).
+- `INITIAL_ADMIN_PASSWORD` — initial password, at least 10 characters.
+- `SUPABASE_SECRET_KEY` — the project's secret API key.
 
-## Supabase Edge Function setup
+Deploy the `admin-api` Edge Function from `supabase/functions/admin-api`. The first successful login using the exact bootstrap username/password creates the single `main_admin` account. After confirming that login works, remove `INITIAL_ADMIN_USERNAME` and `INITIAL_ADMIN_PASSWORD` from Edge Function secrets. Keep `SUPABASE_SECRET_KEY`.
 
-The secure admin API lives in `supabase/functions/admin-api/index.ts`. It validates Telegram Login Widget signatures on the server, creates short-lived administrator sessions, checks permissions, and handles tournament/participant/match actions.
+### Administrator accounts
+The main administrator creates moderator accounts inside `admin.html`, assigning permissions for tournaments, players, and matches/results. There is no public registration, email, or Telegram dependency. Moderator passwords are hashed server-side with PBKDF2-SHA-256; only a short-lived random session token is kept in the browser's session storage. Accounts can be disabled and their passwords reset by the main administrator.
 
-Before deploying:
-1. Run the migration in `supabase/migrations/202611040001_admin_sessions.sql` in the Supabase SQL Editor (the initial schema was created separately).
-2. Set Edge Function secrets: `TELEGRAM_BOT_TOKEN`, `MAIN_ADMIN_TELEGRAM_ID`, and `SUPABASE_SECRET_KEY`.
-3. Deploy the `admin-api` Edge Function with Supabase CLI.
-4. Configure the Telegram bot's allowed website domain to `sleepingluks.github.io` using BotFather.
+## Tournament formats
+- Single Elimination — knockout bracket.
+- Swiss System — standings-based pairings. Confirm the scoring/draw policy before implementing Swiss round generation.
 
-The frontend Telegram Login Widget must use the bot's public username. Never commit the bot token, Telegram admin ID, or Supabase secret key.
+## Deployment status
+The username/password login and moderator-account management interface and Edge Function source are committed. They are **not live** until the SQL migration is applied, Edge Function secrets are configured, and the function is deployed. Tournament management UI actions still need to be connected to their backend operations.
