@@ -62,6 +62,23 @@ async function loadAdmins() {
           try { await request("update_admin", { admin_id: item.id, is_active: !item.is_active }); await loadAdmins(); }
           catch (e) { alert(e.message); }
         });
+        const edit = document.createElement("button");
+        edit.className = "button-small";
+        edit.textContent = "Изменить права";
+        edit.addEventListener("click", async () => {
+          const current = ["tournaments_manage", "players_manage", "matches_manage"].filter(k => item.permissions?.[k]).join(", ");
+          const value = prompt("Права через запятую:\\ntournaments_manage — турниры\\nplayers_manage — игроки\\nmatches_manage — матчи и результаты\\nОставь поле пустым, чтобы снять все права.", current);
+          if (value === null) return;
+          const selected = value.split(",").map(x => x.trim());
+          try {
+            await request("update_admin", { admin_id: item.id, permissions: {
+              tournaments_manage: selected.includes("tournaments_manage"),
+              players_manage: selected.includes("players_manage"),
+              matches_manage: selected.includes("matches_manage")
+            }});
+            await loadAdmins();
+          } catch (e) { alert(e.message); }
+        });
         const reset = document.createElement("button");
         reset.className = "button-small";
         reset.textContent = "Сменить пароль";
@@ -71,7 +88,7 @@ async function loadAdmins() {
           try { await request("update_admin", { admin_id: item.id, password }); alert("Пароль обновлён."); }
           catch (e) { alert(e.message); }
         });
-        actions.append(toggle, reset);
+        actions.append(toggle, edit, reset);
         row.append(actions);
       }
       list.append(row);
