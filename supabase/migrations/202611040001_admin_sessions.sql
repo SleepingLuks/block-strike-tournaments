@@ -16,3 +16,11 @@ alter table public.admin_sessions enable row level security;
 revoke all on public.admin_sessions from anon, authenticated;
 
 -- Remove expired sessions periodically from the Edge Function during login.
+
+-- Stable match order within each round (used for bracket progression).
+alter table public.matches
+  add column if not exists match_number integer;
+
+create unique index if not exists matches_round_match_number_idx
+on public.matches (round_id, match_number)
+where match_number is not null;
