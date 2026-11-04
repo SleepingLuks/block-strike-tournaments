@@ -110,9 +110,13 @@ Deno.serve(async (req) => {
     .gt("expires_at", new Date().toISOString()).maybeSingle();
   if (sessionError || !session) return json({ error: "Session expired. Sign in again." }, 401);
 
-  const { data: admin, error: adminError } = await db.from("admins")
+  const { data: admin, error: adminError } = await db.from("admin_accounts")
     .select("id,username,role,permissions,is_active").eq("id", session.admin_id).maybeSingle();
   if (adminError || !admin || !admin.is_active) return json({ error: "Administrator access revoked" }, 403);
+
+  if (body.action === "me") {
+    return json({ admin: { id: admin.id, username: admin.username, role: admin.role, permissions: admin.permissions } });
+  }
 
   const requirePermission = (permission: string) =>
     hasPermission(admin, permission) || admin.role === "main_admin";
