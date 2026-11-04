@@ -1,10 +1,66 @@
-<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#09090c"><title>Админ-панель — Block Strike Tournaments</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body>
-<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a><nav class="main-nav" id="mainNav"><a href="index.html" data-i18n="home">Главная</a><a href="tournaments.html" data-i18n="tournaments">Турниры</a></nav><div class="header-actions"><button class="lang-toggle" id="langToggle">EN</button><a class="admin-link" href="index.html"><span data-i18n="backSite">На сайт ↗</span></a><button class="menu-toggle" id="menuToggle" aria-label="Меню">☰</button></div></header>
-<main class="page-main section-wrap admin-page"><div class="breadcrumbs"><a href="index.html" data-i18n="home">Главная</a><span>/</span><b data-i18n="adminPanel">Админ-панель</b></div><div class="page-heading"><div><div class="eyebrow"><i></i><span>CONTROL CENTER</span></div><h1 data-i18n="adminTitle">УПРАВЛЕНИЕ <em>ТУРНИРАМИ</em></h1><p data-i18n="adminSub">Создание соревнований, управление игроками, матчами и результатами.</p></div></div>
-<div class="admin-notice"><b data-i18n="authRequired">ТРЕБУЕТСЯ АВТОРИЗАЦИЯ</b><p data-i18n="authText">Вход будет доступен администраторам через Telegram после подключения защищённой серверной проверки.</p><button class="button button-primary" id="telegramLogin" type="button"><span data-i18n="telegramLogin">Войти через Telegram</span><b>↗</b></button></div>
-<div class="admin-grid"><a class="admin-tile" href="#manage"><span>01 / TOURNAMENTS</span><h3 data-i18n="manageTournaments">Турниры</h3><p data-i18n="manageTournamentsText">Создание, редактирование, публикация и архив.</p></a><a class="admin-tile" href="#players"><span>02 / PLAYERS</span><h3 data-i18n="managePlayers">Участники</h3><p data-i18n="managePlayersText">Добавление игроков по игровому нику.</p></a><a class="admin-tile" href="#matches-admin"><span>03 / MATCHES</span><h3 data-i18n="manageMatches">Матчи и результаты</h3><p data-i18n="manageMatchesText">Формирование пар, ввод и исправление счёта.</p></a><a class="admin-tile" href="#admins"><span>04 / ACCESS</span><h3 data-i18n="manageAdmins">Администраторы</h3><p data-i18n="manageAdminsText">Главный администратор и права обычных администраторов.</p></a></div>
-<section class="template-section" id="manage"><div class="section-heading"><div><div class="eyebrow"><i></i><span>TOURNAMENT SETUP</span></div><h2 data-i18n="createTournament">СОЗДАНИЕ <em>ТУРНИРА</em></h2></div></div><form class="admin-form" id="tournamentForm"><label><span data-i18n="nameLabel">Название турнира</span><input required placeholder=" " disabled></label><label><span data-i18n="formatLabel">Формат</span><select disabled><option>Single Elimination</option><option>Swiss System</option></select></label><label><span data-i18n="capacityLabel">Количество участников</span><input type="number" min="2" placeholder="—" disabled></label><label><span data-i18n="dateLabel">Дата начала</span><input type="datetime-local" disabled></label><label class="full-field"><span data-i18n="descriptionLabel">Описание и правила</span><textarea rows="3" disabled></textarea></label><button class="button button-primary" type="button" disabled><span data-i18n="createDraft">Создать турнир</span><b>＋</b></button><p class="form-hint" data-i18n="formDisabled">Форма станет активной после подключения авторизации и базы данных.</p></form></section>
-<section class="template-section" id="players"><div class="section-heading"><div><div class="eyebrow"><i></i><span>PLAYER MANAGEMENT</span></div><h2 data-i18n="playersTitle">УПРАВЛЕНИЕ <em>ИГРОКАМИ</em></h2></div></div><div class="table-shell"><div class="table-empty" data-i18n="playersEmpty">Игроки будут добавляться администратором вручную по игровым никам.</div></div></section>
-<section class="template-section" id="matches-admin"><div class="section-heading"><div><div class="eyebrow"><i></i><span>MATCH CONTROL</span></div><h2 data-i18n="matchesAdminTitle">МАТЧИ И <em>СЧЁТ</em></h2></div></div><div class="table-shell"><div class="table-empty" data-i18n="matchesEmpty">Здесь появятся матчи турниров и инструменты ввода результатов.</div></div></section>
-<section class="template-section" id="admins"><div class="section-heading"><div><div class="eyebrow"><i></i><span>ACCESS CONTROL</span></div><h2 data-i18n="adminsTitle">РОЛИ И <em>ДОСТУП</em></h2></div></div><div class="role-grid"><article class="role-card"><span>OWNER</span><h3 data-i18n="mainAdmin">Главный администратор</h3><p data-i18n="mainAdminText">Управляет турнирами и назначает или отзывает права администраторов.</p></article><article class="role-card"><span>ADMIN</span><h3 data-i18n="regularAdmin">Администратор</h3><p data-i18n="regularAdminText">Управляет турнирами, участниками, матчами и результатами в пределах выданных прав.</p></article></div><p class="section-hint" data-i18n="securityNote">Проверка Telegram-подписи и прав доступа должна выполняться на сервере. Нельзя хранить секреты или доверять роли, переданной из браузера.</p></section>
-</main><footer class="site-footer section-wrap"><a class="brand" href="index.html"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a><span data-i18n="footer">Турниры сообщества Block Strike.</span><span class="footer-copy">© 2026 BLOCK STRIKE TOURNAMENTS</span></footer><script src="script.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09090c">
+<title>Админ-панель — Block Strike Tournaments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-auth{max-width:520px;margin:50px auto;padding:30px;border:1px solid #29292f;background:#101014;border-radius:14px}
+.admin-auth h2,.admin-panel h2{margin:0 0 10px}.admin-auth p,.admin-muted{color:#a2a2ad;line-height:1.6}
+.admin-auth form,.admin-create-form{display:grid;gap:15px}.admin-auth label,.admin-create-form label{display:grid;gap:7px;color:#c9c9d1;font-size:13px}
+.admin-auth input,.admin-create-form input{width:100%;padding:13px 14px;background:#08080b;border:1px solid #34343c;border-radius:8px;color:#fff;font:inherit}
+.admin-message{margin-top:14px;color:#ff7777;min-height:20px;font-size:13px}.admin-panel{display:grid;gap:24px}
+.admin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:18px;border:1px solid #29292f;background:#101014;border-radius:12px}
+.admin-card{padding:24px;border:1px solid #29292f;background:#101014;border-radius:12px}
+.admin-checks{display:flex;gap:18px;flex-wrap:wrap;color:#ddd;font-size:13px}.admin-checks label{display:flex;align-items:center;gap:7px}
+.admin-account{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 0;border-bottom:1px solid #29292f;flex-wrap:wrap}
+.admin-account:last-child{border-bottom:0}.admin-account small{display:block;color:#999;margin-top:5px}
+.admin-status{color:#ff7777;font-size:12px}.admin-status.active{color:#8bd5a5}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}.button-small{padding:9px 12px;border:1px solid #41414b;background:#17171d;color:#fff;border-radius:7px;cursor:pointer}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="site-header">
+<a class="brand" href="index.html"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a>
+<nav class="main-nav" id="mainNav"><a href="index.html">Главная</a><a href="tournaments.html">Турниры</a></nav>
+<div class="header-actions"><button class="lang-toggle" id="langToggle">EN</button><a class="admin-link" href="index.html">На сайт ↗</a><button class="menu-toggle" id="menuToggle" aria-label="Меню">☰</button></div>
+</header>
+<main class="page-main section-wrap admin-page">
+<div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><b>Админ-панель</b></div>
+<div class="page-heading"><div><div class="eyebrow"><i></i><span>CONTROL CENTER</span></div><h1>УПРАВЛЕНИЕ <em>ТУРНИРАМИ</em></h1><p>Закрытая панель управления Block Strike Tournaments.</p></div></div>
+<section class="admin-auth" id="loginView">
+<div class="eyebrow"><i></i><span>ADMIN ACCESS</span></div><h2>ВХОД В <em>СИСТЕМУ</em></h2>
+<p>Вход только по выданному логину и паролю. Регистрация посетителей отключена.</p>
+<form id="loginForm">
+<label>Логин<input id="loginUsername" name="username" autocomplete="username" minlength="3" maxlength="24" required></label>
+<label>Пароль<input id="loginPassword" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required></label>
+<button class="button button-primary" type="submit">Войти <b>↗</b></button>
+</form><div class="admin-message" id="loginMessage" role="status"></div>
+</section>
+<section class="admin-panel" id="adminView" hidden>
+<div class="admin-toolbar"><div><div class="eyebrow"><i></i><span id="roleLabel">ADMIN SESSION</span></div><h2 id="welcomeText">Панель администратора</h2></div><button class="button-small" id="logoutButton">Выйти</button></div>
+<section class="admin-card" id="accountManagement" hidden>
+<div class="eyebrow"><i></i><span>ACCESS CONTROL</span></div><h2>АККАУНТЫ <em>МОДЕРАТОРОВ</em></h2>
+<p class="admin-muted">Создавать аккаунты и назначать права может только главный администратор. Логин — латиница, цифры и подчёркивание. Пароль — минимум 10 символов.</p>
+<form class="admin-create-form" id="createAdminForm">
+<label>Логин модератора<input id="newAdminUsername" required minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]+" autocomplete="off"></label>
+<label>Пароль<input id="newAdminPassword" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+<div class="admin-checks">
+<label><input type="checkbox" name="permission" value="tournaments_manage"> Управление турнирами</label>
+<label><input type="checkbox" name="permission" value="players_manage"> Управление игроками</label>
+<label><input type="checkbox" name="permission" value="matches_manage"> Матчи и результаты</label>
+</div>
+<button class="button button-primary" type="submit">Создать аккаунт <b>＋</b></button>
+</form><div class="admin-message" id="createAdminMessage" role="status"></div>
+<div class="admin-list" id="adminList"><p class="admin-muted">Загрузка аккаунтов…</p></div>
+</section>
+<section class="admin-card"><div class="eyebrow"><i></i><span>TOURNAMENT MANAGEMENT</span></div><h2>УПРАВЛЕНИЕ <em>ТУРНИРАМИ</em></h2><p class="admin-muted">Авторизация и управление аккаунтами подключены. Следующий этап — связать формы создания турниров, участников и результатов с серверными действиями.</p></section>
+</section>
+</main>
+<footer class="site-footer section-wrap"><a class="brand" href="index.html"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a><span>Турниры сообщества Block Strike.</span><span class="footer-copy">© 2026 BLOCK STRIKE TOURNAMENTS</span></footer>
+<script src="script.js"></script><script type="module" src="admin.js"></script>
+</body></html>
