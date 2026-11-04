@@ -121,6 +121,16 @@ Deno.serve(async (req) => {
   const requirePermission = (permission: string) =>
     hasPermission(admin, permission) || admin.role === "main_admin";
 
+  if (body.action === "list_tournaments") {
+    if (!requirePermission("tournaments_manage")) return json({ error: "Permission denied" }, 403);
+    const { data, error } = await db.from("tournaments")
+      .select("id,name,description,format,status,starts_at")
+      .order("starts_at", { ascending: true, nullsFirst: false })
+      .limit(100);
+    if (error) return json({ error: error.message }, 500);
+    return json({ tournaments: data || [] });
+  }
+
   if (body.action === "create_tournament") {
     if (!requirePermission("tournaments_manage")) return json({ error: "Permission denied" }, 403);
     const { name, format, description, starts_at } = body;
