@@ -32,7 +32,9 @@ function renderAdmin(admin) {
   document.getElementById("roleLabel").textContent = admin.role === "main_admin" ? "MAIN ADMINISTRATOR" : "MODERATOR";
   const owner = admin.role === "main_admin";
   document.getElementById("accountManagement").hidden = !owner;
+  tournamentManagement.hidden = !canManageTournaments(admin);
   if (owner) loadAdmins();
+  if (canManageTournaments(admin)) loadTournaments();
 }
 async function loadAdmins() {
   const list = document.getElementById("adminList");
@@ -95,6 +97,79 @@ async function loadAdmins() {
     }
   } catch (e) { list.textContent = e.message; }
 }
+const tournamentManagement = document.getElementById("tournamentManagement");
+const tournamentMessage = document.getElementById("tournamentMessage");
+const tournamentList = document.getElementById("adminTournamentList");
+const canManageTournaments = admin => admin?.role === "main_admin" || admin?.permissions?.tournaments_manage === true;
+const tournamentStatus = status => ({ draft: "Черновик", upcoming: "Предстоящий", active: "Идёт", finished: "Завершён", cancelled: "Отменён" }[status] || status);
+function renderTournamentRows(tournaments) {
+  tournamentList.replaceChildren();
+  const heading = document.createElement("h3");
+  heading.textContent = "Созданные турниры";
+  tournamentList.append(heading);
+  if (!tournaments.length) {
+    const empty = document.createElement("p");
+    empty.className = "admin-muted";
+    empty.textContent = "Турниров пока нет.";
+    tournamentList.append(empty);
+    return;
+  }
+  for (const tournament of tournaments) {
+    const row = document.createElement("div");
+    row.className = "admin-tournament-row";
+    const info = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = tournament.name;
+    const meta = document.createElement("small");
+    meta.textContent = (tournament.format === "single_elimination" ? "Single Elimination" : "Swiss System") + " · " + tournamentStatus(tournament.status) + (tournament.starts_at ? " · " + new Date(tournament.starts_at).toLocaleString() : "");
+    info.append(name, meta);
+    row.append(info);
+    if (tournament.status === "draft") {
+      const publish = document.createElement("button");
+      publish.className = "button-small";
+      publish.textContent = "Опубликовать";
+      publish.addEventListener("click", async () => {
+        publish.disabled = true;
+        try {
+          await request("publish_tournament", { tournament_id: tournament.id, status: "upcoming" });
+          await loadTournaments();
+        } catch (error) {
+          alert(error.message);
+          publish.disabled = false;
+        }
+      });
+      row.append(publish);
+    }
+    tournamentList.append(row);
+  }
+}
+async function loadTournaments() {
+  tournamentList.textContent = "Загрузка турниров…";
+  try {
+    const { tournaments } = await request("list_tournaments");
+    renderTournamentRows(tournaments || []);
+  } catch (error) {
+    tournamentList.textContent = error.message;
+  }
+}
+document.getElementById("createTournamentForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  tournamentMessage.textContent = "Создание турнира…";
+  const name = document.getElementById("tournamentName").value.trim();
+  const format = document.getElementById("tournamentFormat").value;
+  const description = document.getElementById("tournamentDescription").value.trim();
+  const localDate = document.getElementById("tournamentStartsAt").value;
+  const starts_at = localDate ? new Date(localDate).toISOString() : null;
+  try {
+    const { tournament } = await request("create_tournament", { name, format, description, starts_at });
+    tournamentMessage.textContent = "Черновик «" + tournament.name + "» создан.";
+    event.currentTarget.reset();
+    await loadTournaments();
+  } catch (error) {
+    tournamentMessage.textContent = error.message;
+  }
+});
+
 document.getElementById("loginForm").addEventListener("submit", async event => {
   event.preventDefault(); loginMessage.textContent = "Проверка данных…";
   const username = document.getElementById("loginUsername").value;
