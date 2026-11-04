@@ -25,3 +25,15 @@ Supabase project: `https://cmnkimnhogeatciffpkm.supabase.co`. The browser uses t
 Tournament formats:
 - Single Elimination: knockout bracket.
 - Swiss System: configurable rounds and standings-based pairings. Confirm scoring/draw policy before implementing tournament logic.
+
+## Supabase Edge Function setup
+
+The secure admin API lives in `supabase/functions/admin-api/index.ts`. It validates Telegram Login Widget signatures on the server, creates short-lived administrator sessions, checks permissions, and handles tournament/participant/match actions.
+
+Before deploying:
+1. Run the migration in `supabase/migrations/202611040001_admin_sessions.sql` in the Supabase SQL Editor (the initial schema was created separately).
+2. Set Edge Function secrets: `TELEGRAM_BOT_TOKEN`, `MAIN_ADMIN_TELEGRAM_ID`, and `SUPABASE_SECRET_KEY`.
+3. Deploy the `admin-api` Edge Function with Supabase CLI.
+4. Configure the Telegram bot's allowed website domain to `sleepingluks.github.io` using BotFather.
+
+The frontend Telegram Login Widget must use the bot's public username. Never commit the bot token, Telegram admin ID, or Supabase secret key.
