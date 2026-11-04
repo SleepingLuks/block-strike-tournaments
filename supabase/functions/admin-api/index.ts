@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
       roundIds.push(roundRow.id);
       const count = size / (2 ** round);
       const rows = Array.from({ length: count }, (_, i) => ({
-        tournament_id: tournamentId, round_id: roundRow.id,
+        tournament_id: tournamentId, round_id: roundRow.id, match_number: i + 1,
         player1_participant_id: round === 1 ? slots[i * 2] : null,
         player2_participant_id: round === 1 ? slots[i * 2 + 1] : null,
         status: "pending",
@@ -195,18 +195,23 @@ Deno.serve(async (req) => {
       if (matchError) return json({ error: matchError.message }, 500);
       matchesByRound.push(matches || []);
     }
-    // Automatically advance first-round byes.
-    for (let i = 0; i < matchesByRound[0].length; i++) {
-      const match = matchesByRound[0][i];
-      const onlyPlayer = match.player1_participant_id || match.player2_participant_id;
-      if (onlyPlayer && (!match.player1_participant_id || !match.player2_participant_id)) {
-        await db.from("matches").update({
-          status: "bye", winner_participant_id: onlyPlayer, completed_at: new Date().toISOString(),
-        }).eq("id", match.id);
-        const next = matchesByRound[1]?.[Math.floor(i / 2)];
-        if (next) {
-          const field = i % 2 === 0 ? "player1_participant_id" : "player2_participant_id";
-          await db.from("matches").update({ [field]: onlyPlayer }).eq("id", next.id);
+    // Propagate automatic byes through later rounds (including empty bracket slots).
+    for (let roundIndex = 0; roundIndex < matchesByRound.length - 1; roundIndex++) {
+      for (let i = 0; i < matchesByRound[roundIndex].length; i++) {
+        const match = matchesByRound[roundIndex][i];
+        const onlyPlayer = match.player1_participant_id || match.player2_participant_id;
+        const hasOnePlayer = Boolean(onlyPlayer) &&
+          (!match.player1_participant_id || !match.player2_participant_id);
+        if (hasOnePlayer) {
+          await db.from("matches").update({
+            status: "bye", winner_participant_id: onlyPlayer, completed_at: new Date().toISOString(),
+          }).eq("id", match.id);
+          const next = matchesByRound[roundIndex + 1]?.[Math.floor(i / 2)];
+          if (next) {
+            const field = i % 2 === 0 ? "player1_participant_id" : "player2_participant_id";
+            await db.from("matches").update({ [field]: onlyPlayer }).eq("id", next.id);
+            next[field] = onlyPlayer;
+          }
         }
       }
     }
@@ -236,11 +241,11 @@ Deno.serve(async (req) => {
         .eq("tournament_id", match.tournament_id).order("round_number");
       const currentIndex = rounds?.findIndex(r => r.id === match.round_id) ?? -1;
       if (currentIndex >= 0 && currentIndex < (rounds?.length || 0) - 1) {
-        const { data: currentMatches } = await db.from("matches").select("id")
-          .eq("round_id", match.round_id).order("created_at");
+        const { data: currentMatches } = await db.from("matches").select("id,match_number")
+          .eq("round_id", match.round_id).order("match_number");
         const matchIndex = currentMatches?.findIndex(m => m.id === match_id) ?? -1;
-        const { data: nextMatches } = await db.from("matches").select("id")
-          .eq("round_id", rounds![currentIndex + 1].id).order("created_at");
+        const { data: nextMatches } = await db.from("matches").select("id,match_number")
+          .eq("round_id", rounds![currentIndex + 1].id).order("match_number");
         const next = nextMatches?.[Math.floor(matchIndex / 2)];
         if (next && matchIndex >= 0) {
           const field = matchIndex % 2 === 0 ? "player1_participant_id" : "player2_participant_id";
