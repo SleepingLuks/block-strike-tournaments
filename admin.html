@@ -11,8 +11,8 @@
 .admin-auth{max-width:520px;margin:50px auto;padding:30px;border:1px solid #29292f;background:#101014;border-radius:14px}
 .admin-auth h2,.admin-panel h2{margin:0 0 10px}.admin-auth p,.admin-muted{color:#a2a2ad;line-height:1.6}
 .admin-auth form,.admin-create-form{display:grid;gap:15px}.admin-auth label,.admin-create-form label{display:grid;gap:7px;color:#c9c9d1;font-size:13px}
-.admin-auth input,.admin-create-form input{width:100%;padding:13px 14px;background:#08080b;border:1px solid #34343c;border-radius:8px;color:#fff;font:inherit}
-.admin-message{margin-top:14px;color:#ff7777;min-height:20px;font-size:13px}.admin-panel{display:grid;gap:24px}
+.admin-auth input,.admin-create-form input,.admin-create-form select,.admin-create-form textarea{width:100%;padding:13px 14px;background:#08080b;border:1px solid #34343c;border-radius:8px;color:#fff;font:inherit}
+.admin-create-form select,.admin-create-form textarea{width:100%;padding:13px 14px;background:#08080b;border:1px solid #34343c;border-radius:8px;color:#fff;font:inherit}.admin-tournament-row{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid #29292f}.admin-tournament-row small{display:block;color:#999;margin-top:5px}.admin-message{margin-top:14px;color:#ff7777;min-height:20px;font-size:13px}.admin-panel{display:grid;gap:24px}
 .admin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:18px;border:1px solid #29292f;background:#101014;border-radius:12px}
 .admin-card{padding:24px;border:1px solid #29292f;background:#101014;border-radius:12px}
 .admin-checks{display:flex;gap:18px;flex-wrap:wrap;color:#ddd;font-size:13px}.admin-checks label{display:flex;align-items:center;gap:7px}
@@ -58,7 +58,20 @@
 </form><div class="admin-message" id="createAdminMessage" role="status"></div>
 <div class="admin-list" id="adminList"><p class="admin-muted">Загрузка аккаунтов…</p></div>
 </section>
-<section class="admin-card"><div class="eyebrow"><i></i><span>TOURNAMENT MANAGEMENT</span></div><h2>УПРАВЛЕНИЕ <em>ТУРНИРАМИ</em></h2><p class="admin-muted">Авторизация и управление аккаунтами подключены. Следующий этап — связать формы создания турниров, участников и результатов с серверными действиями.</p></section>
+<section class="admin-card" id="tournamentManagement" hidden>
+<div class="eyebrow"><i></i><span>TOURNAMENT MANAGEMENT</span></div>
+<h2>СОЗДАТЬ <em>ТУРНИР</em></h2>
+<p class="admin-muted">Новый турнир сначала создаётся как черновик. После проверки его можно опубликовать.</p>
+<form class="admin-create-form" id="createTournamentForm">
+<label>Название турнира<input id="tournamentName" required minlength="1" maxlength="100" placeholder="Например, Block Strike Open"></label>
+<label>Формат<select id="tournamentFormat" required><option value="single_elimination">Single Elimination</option><option value="swiss">Swiss System</option></select></label>
+<label>Описание<textarea id="tournamentDescription" rows="4" maxlength="5000" placeholder="Правила, призы и дополнительная информация"></textarea></label>
+<label>Дата начала<input id="tournamentStartsAt" type="datetime-local"></label>
+<button class="button button-primary" type="submit">Создать черновик <b>＋</b></button>
+</form>
+<div class="admin-message" id="tournamentMessage" role="status"></div>
+<div class="admin-tournament-list" id="adminTournamentList"><p class="admin-muted">Загрузка турниров…</p></div>
+</section>
 </section>
 </main>
 <footer class="site-footer section-wrap"><a class="brand" href="index.html"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a><span>Турниры сообщества Block Strike.</span><span class="footer-copy">© 2026 BLOCK STRIKE TOURNAMENTS</span></footer>
