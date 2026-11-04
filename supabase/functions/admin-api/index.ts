@@ -20,25 +20,19 @@ async function sha256(value: string) {
   return hex(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
 }
 
-async function verifyTelegram(payload: Record<string, unknown>, botToken: string) {
-  const suppliedHash = String(payload.hash || "");
-  const authDate = Number(payload.auth_date || 0);
-  if (!/^[a-f0-9]{64}$/i.test(suppliedHash) || !Number.isInteger(authDate)) return false;
-  if (Math.abs(Date.now() / 1000 - authDate) > 300) return false;
+async function hashPassword(password: string, saltHex?: string) {
+  const salt = saltHex ? Uint8Array.from(saltHex.match(/.{2}/g)!.map(x => parseInt(x, 16))) : crypto.getRandomValues(new Uint8Array(16));
+  const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" }, material, 256);
+  return [...salt].map(x => x.toString(16).padStart(2, "0")).join("") + ":" + hex(bits);
+}
 
-  const entries = Object.entries(payload)
-    .filter(([key, value]) => key !== "hash" && value !== undefined && value !== null)
-    .map(([key, value]) => [key, String(value)] as const)
-    .sort(([a], [b]) => a.localeCompare(b));
-  const checkString = entries.map(([key, value]) => key + "=" + value).join("\n");
-
-  const secret = await crypto.subtle.digest("SHA-256", encoder.encode(botToken));
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  const expected = hex(await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(checkString)));
-  return expected.length === suppliedHash.length &&
-    [...expected].every((char, i) => char === suppliedHash[i].toLowerCase());
+async function verifyPassword(password: string, stored: string) {
+  const [salt, expected] = stored.split(":");
+  if (!salt || !expected) return false;
+  const actual = await hashPassword(password, salt);
+  const actualHash = actual.split(":")[1];
+  return actualHash.length === expected.length && [...actualHash].every((c, i) => c === expected[i]);
 }
 
 function hasPermission(admin: any, permission: string) {
@@ -51,9 +45,9 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const secretKey = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
-  const mainAdminId = Deno.env.get("MAIN_ADMIN_TELEGRAM_ID");
-  if (!supabaseUrl || !secretKey || !botToken || !mainAdminId) {
+  const bootstrapUsername = Deno.env.get("INITIAL_ADMIN_USERNAME");
+  const bootstrapPassword = Deno.env.get("INITIAL_ADMIN_PASSWORD");
+  if (!supabaseUrl || !secretKey) {
     return json({ error: "Server environment is not configured" }, 500);
   }
 
@@ -65,27 +59,32 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
 
   if (body.action === "login") {
-    const telegram = body.telegram;
-    if (!telegram || !(await verifyTelegram(telegram, botToken))) {
-      return json({ error: "Telegram authentication is invalid or expired" }, 401);
+    const username = String(body.username || "").trim().toLowerCase();
+    const password = String(body.password || "");
+    if (!/^[a-z0-9_]{3,24}$/.test(username) || password.length < 10 || password.length > 128) {
+      return json({ error: "Неверный логин или пароль" }, 401);
     }
-    const telegramId = Number(telegram.id);
-    if (!Number.isSafeInteger(telegramId) || telegramId <= 0) return json({ error: "Invalid Telegram ID" }, 400);
 
-    let admin: any = null;
-    if (String(telegramId) === mainAdminId) {
-      const { data, error } = await db.from("admins").upsert({
-        telegram_id: telegramId, role: "main_admin", permissions: {},
-      }, { onConflict: "telegram_id" }).select("telegram_id,role,permissions").single();
-      if (error) return json({ error: error.message }, 500);
-      admin = data;
-    } else {
-      const { data, error } = await db.from("admins")
-        .select("telegram_id,role,permissions").eq("telegram_id", telegramId).maybeSingle();
-      if (error) return json({ error: error.message }, 500);
-      admin = data;
+    let { data: admin } = await db.from("admin_accounts")
+      .select("id,username,password_hash,role,permissions,is_active")
+      .eq("username", username).maybeSingle();
+
+    if (!admin) {
+      const { count, error: countError } = await db.from("admin_accounts")
+        .select("id", { count: "exact", head: true }).eq("role", "main_admin");
+      if (countError) return json({ error: countError.message }, 500);
+      const bootstrapMatches = count === 0 && bootstrapUsername && bootstrapPassword &&
+        username === bootstrapUsername.trim().toLowerCase() && password === bootstrapPassword;
+      if (!bootstrapMatches) return json({ error: "Неверный логин или пароль" }, 401);
+      const passwordHash = await hashPassword(password);
+      const { data: created, error: createError } = await db.from("admin_accounts").insert({
+        username, password_hash: passwordHash, role: "main_admin", permissions: {},
+      }).select("id,username,role,permissions,is_active").single();
+      if (createError) return json({ error: createError.message }, 500);
+      admin = { ...created, password_hash: passwordHash };
+    } else if (!admin.is_active || !(await verifyPassword(password, admin.password_hash))) {
+      return json({ error: "Неверный логин или пароль" }, 401);
     }
-    if (!admin) return json({ error: "This Telegram account is not an administrator" }, 403);
 
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
     const sessionToken = hex(tokenBytes.buffer);
@@ -93,12 +92,12 @@ Deno.serve(async (req) => {
     const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
     await db.from("admin_sessions").delete().lt("expires_at", new Date().toISOString());
     const { error: sessionError } = await db.from("admin_sessions").insert({
-      telegram_id: telegramId, token_hash: tokenHash, expires_at: expiresAt,
+      admin_id: admin.id, token_hash: tokenHash, expires_at: expiresAt,
     });
     if (sessionError) return json({ error: sessionError.message }, 500);
     return json({
       token: sessionToken, expires_at: expiresAt,
-      admin: { telegram_id: admin.telegram_id, role: admin.role, permissions: admin.permissions },
+      admin: { id: admin.id, username: admin.username, role: admin.role, permissions: admin.permissions },
     });
   }
 
@@ -107,13 +106,13 @@ Deno.serve(async (req) => {
   if (!token || token.length !== 64) return json({ error: "Unauthorized" }, 401);
   const tokenHash = await sha256(token);
   const { data: session, error: sessionError } = await db.from("admin_sessions")
-    .select("telegram_id,expires_at").eq("token_hash", tokenHash)
+    .select("admin_id,expires_at").eq("token_hash", tokenHash)
     .gt("expires_at", new Date().toISOString()).maybeSingle();
   if (sessionError || !session) return json({ error: "Session expired. Sign in again." }, 401);
 
   const { data: admin, error: adminError } = await db.from("admins")
-    .select("telegram_id,role,permissions").eq("telegram_id", session.telegram_id).maybeSingle();
-  if (adminError || !admin) return json({ error: "Administrator access revoked" }, 403);
+    .select("id,username,role,permissions,is_active").eq("id", session.admin_id).maybeSingle();
+  if (adminError || !admin || !admin.is_active) return json({ error: "Administrator access revoked" }, 403);
 
   const requirePermission = (permission: string) =>
     hasPermission(admin, permission) || admin.role === "main_admin";
@@ -259,25 +258,52 @@ Deno.serve(async (req) => {
     return json({ winner_participant_id: winner });
   }
 
-  if (body.action === "manage_admin") {
-    if (admin.role !== "main_admin") return json({ error: "Only the main administrator can manage admins" }, 403);
-    const targetId = Number(body.telegram_id);
-    if (!Number.isSafeInteger(targetId) || targetId <= 0 || targetId === Number(mainAdminId)) return json({ error: "Invalid target Telegram ID" }, 400);
-    if (body.operation === "remove") {
-      const { error } = await db.from("admins").delete().eq("telegram_id", targetId);
-      if (error) return json({ error: error.message }, 400);
-      return json({ success: true });
-    }
-    if (body.operation === "grant") {
+  if (body.action === "create_admin") {
+    if (admin.role !== "main_admin") return json({ error: "Only the main administrator can create accounts" }, 403);
+    const username = String(body.username || "").trim().toLowerCase();
+    const password = String(body.password || "");
+    if (!/^[a-z0-9_]{3,24}$/.test(username)) return json({ error: "Логин: 3–24 символа, латиница, цифры и _" }, 400);
+    if (password.length < 10 || password.length > 128) return json({ error: "Пароль должен содержать от 10 до 128 символов" }, 400);
+    const allowed = ["tournaments_manage", "players_manage", "matches_manage"];
+    const permissions: Record<string, boolean> = {};
+    for (const key of allowed) permissions[key] = body.permissions?.[key] === true;
+    const { data, error } = await db.from("admin_accounts").insert({
+      username, password_hash: await hashPassword(password), role: "admin", permissions,
+    }).select("id,username,role,permissions,is_active").single();
+    if (error) return json({ error: error.code === "23505" ? "Этот логин уже занят" : error.message }, 400);
+    return json({ admin: data });
+  }
+
+  if (body.action === "update_admin") {
+    if (admin.role !== "main_admin") return json({ error: "Only the main administrator can update accounts" }, 403);
+    const id = String(body.admin_id || "");
+    if (!id || id === admin.id) return json({ error: "Нельзя изменить собственную учётную запись здесь" }, 400);
+    const update: Record<string, unknown> = {};
+    if (body.permissions && typeof body.permissions === "object") {
       const allowed = ["tournaments_manage", "players_manage", "matches_manage"];
       const permissions: Record<string, boolean> = {};
-      for (const key of allowed) permissions[key] = body.permissions?.[key] === true;
-      const { error } = await db.from("admins").upsert({
-        telegram_id: targetId, role: "admin", permissions,
-      }, { onConflict: "telegram_id" });
-      if (error) return json({ error: error.message }, 400);
-      return json({ success: true });
+      for (const key of allowed) permissions[key] = body.permissions[key] === true;
+      update.permissions = permissions;
     }
+    if (typeof body.is_active === "boolean") update.is_active = body.is_active;
+    if (typeof body.password === "string" && body.password.length) {
+      if (body.password.length < 10 || body.password.length > 128) return json({ error: "Пароль должен содержать от 10 до 128 символов" }, 400);
+      update.password_hash = await hashPassword(body.password);
+    }
+    if (!Object.keys(update).length) return json({ error: "Нет изменений" }, 400);
+    const { data, error } = await db.from("admin_accounts").update(update).eq("id", id).eq("role", "admin")
+      .select("id,username,role,permissions,is_active").maybeSingle();
+    if (error) return json({ error: error.message }, 400);
+    if (!data) return json({ error: "Аккаунт не найден" }, 404);
+    return json({ admin: data });
+  }
+
+  if (body.action === "list_admins") {
+    if (admin.role !== "main_admin") return json({ error: "Only the main administrator can view admin accounts" }, 403);
+    const { data, error } = await db.from("admin_accounts")
+      .select("id,username,role,permissions,is_active,created_at").order("created_at");
+    if (error) return json({ error: error.message }, 500);
+    return json({ admins: data || [] });
   }
 
   return json({ error: "Unknown action" }, 400);
