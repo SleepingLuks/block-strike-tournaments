@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090c">
+  <meta name="description" content="Block Strike Tournaments — турниры, сетки и результаты сообщества Block Strike.">
+  <title>Block Strike Tournaments</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Block Strike Tournaments">
+      <span class="brand-mark">BS</span>
+      <span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span>
+    </a>
+    <nav class="main-nav">
+      <a class="active" href="#home" data-i18n="nav_home">Главная</a>
+      <a href="#tournaments" data-i18n="nav_tournaments">Турниры</a>
+      <a href="#results" data-i18n="nav_results">Результаты</a>
+    </nav>
+    <div class="header-actions">
+      <button class="lang-toggle" id="langToggle" type="button" aria-label="Change language">EN</button>
+      <a class="admin-link" href="#" id="adminLink"><span class="status-dot"></span><span data-i18n="admin">Админ</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
+    </div>
+  </header>
+  <main id="home">
+    <section class="hero section-wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span><span data-i18n="eyebrow">СООБЩЕСТВО BLOCK STRIKE</span></div>
+        <h1><span data-i18n="hero_line1">ТВОЯ ИГРА.</span><br><em data-i18n="hero_line2">ТВОЙ ТУРНИР.</em></h1>
+        <p data-i18n="hero_text">Следи за турнирами Block Strike, смотри сетки и результаты. Всё в одном месте.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#tournaments"><span data-i18n="view_tournaments">Смотреть турниры</span><span>↗</span></a>
+          <a class="text-link" href="#how"><span data-i18n="how_it_works">Как это работает</span><span>↓</span></a>
+        </div>
+        <div class="hero-meta"><span class="live-pulse"></span><span data-i18n="community_status">ТУРНИРЫ СООБЩЕСТВА · BLOCK STRIKE</span></div>
+      </div>
+      <div class="hero-visual" aria-label="Tournament graphic">
+        <div class="visual-grid"></div>
+        <div class="visual-orbit orbit-a"></div><div class="visual-orbit orbit-b"></div>
+        <div class="visual-core"><span>BS</span><small>TOURNAMENTS</small></div>
+        <div class="float-card float-top"><span class="mini-label" data-i18n="next_match">СЛЕДУЮЩИЙ МАТЧ</span><strong>PLAYER<span>_</span>01 <i>VS</i> PLAYER_02</strong><small>ROUND 01 · SINGLE ELIMINATION</small></div>
+        <div class="float-card float-bottom"><span class="mini-label" data-i18n="tournament_status">СТАТУС ТУРНИРА</span><strong><span class="live-pulse"></span> <span data-i18n="registration_open">РЕГИСТРАЦИЯ ОТКРЫТА</span></strong></div>
+      </div>
+    </section>
+    <section class="stats section-wrap">
+      <div><strong>02</strong><span data-i18n="formats">ФОРМАТА ТУРНИРОВ</span></div>
+      <div><strong>1v1</strong><span data-i18n="competition">СОРЕВНОВАНИЕ</span></div>
+      <div><strong>LIVE</strong><span data-i18n="updates">ОБНОВЛЕНИЕ РЕЗУЛЬТАТОВ</span></div>
+    </section>
+    <section class="section-wrap tournaments-section" id="tournaments">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span></span><span data-i18n="competition_hub">COMPETITION HUB</span></div><h2 data-i18n="featured_tournaments">ТУРНИРЫ <em>СООБЩЕСТВА</em></h2></div>
+        <a class="view-all" href="#all-tournaments"><span data-i18n="all_tournaments">Все турниры</span> ↗</a>
+      </div>
+      <div class="tournament-grid" id="tournamentGrid">
+        <article class="tournament-card featured">
+          <div class="card-top"><span class="tag tag-live"><span class="live-pulse"></span><span data-i18n="status_live">LIVE</span></span><span class="card-number">#001</span></div>
+          <div class="card-art art-one"><span class="art-label">SINGLE<br>ELIMINATION</span><div class="art-cross">×</div></div>
+          <div class="card-content"><div class="card-kicker" data-i18n="format_single">ОДИНАРНОЕ ВЫБЫВАНИЕ</div><h3>COMMUNITY CUP #01</h3><div class="card-info"><span>◉ 16 <span data-i18n="players">игроков</span></span><span>◷ <span data-i18n="round">Раунд</span> 2/4</span></div><a class="card-button" href="#tournament-demo"><span data-i18n="open_bracket">Открыть сетку</span><b>↗</b></a></div>
+        </article>
+        <article class="tournament-card">
+          <div class="card-top"><span class="tag tag-open"><span data-i18n="status_upcoming">СКОРО</span></span><span class="card-number">#002</span></div>
+          <div class="card-art art-two"><span class="art-label">SWISS<br>SYSTEM</span><div class="art-cross">+</div></div>
+          <div class="card-content"><div class="card-kicker" data-i18n="format_swiss">ШВЕЙЦАРСКАЯ СИСТЕМА</div><h3>RANKED SERIES #01</h3><div class="card-info"><span>◉ 24 <span data-i18n="players">игрока</span></span><span>◷ 5 <span data-i18n="rounds">раундов</span></span></div><a class="card-button" href="#tournament-demo"><span data-i18n="tournament_details">Подробнее</span><b>↗</b></a></div>
+        </article>
+        <article class="tournament-card card-placeholder">
+          <div class="card-top"><span class="tag tag-draft" data-i18n="status_planned">ПЛАНИРУЕТСЯ</span><span class="card-number">#003</span></div>
+          <div class="placeholder-content"><div class="plus-icon">+</div><h3 data-i18n="next_tournament">СЛЕДУЮЩИЙ<br>ТУРНИР</h3><p data-i18n="new_events">Новые соревнования появятся здесь.</p></div>
+          <div class="card-content"><div class="card-kicker">BLOCK STRIKE</div><h3 data-i18n="stay_tuned">СЛЕДИ ЗА ОБНОВЛЕНИЯМИ</h3><div class="card-info"><span data-i18n="more_soon">СКОРО БОЛЬШЕ</span></div></div>
+        </article>
+      </div>
+    </section>
+    <section class="section-wrap demo-section" id="tournament-demo">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span></span><span data-i18n="tournament_preview">TOURNAMENT PREVIEW</span></div><h2>COMMUNITY CUP <em>#01</em></h2></div>
+        <span class="tag tag-live"><span class="live-pulse"></span> LIVE</span>
+      </div>
+      <div class="bracket-panel">
+        <div class="bracket-toolbar"><div><strong data-i18n="playoff_bracket">СЕТКА ПЛЕЙ-ОФФ</strong><small data-i18n="demo_data">ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ</small></div><span class="round-count">ROUND 02 / 04</span></div>
+        <div class="bracket-scroll">
+          <div class="bracket">
+            <div class="bracket-round"><h4 data-i18n="quarterfinals">ЧЕТВЕРТЬФИНАЛ</h4>
+              <div class="match"><div class="team winner"><span>01</span> Luks0vix <b>2</b></div><div class="team"><span>08</span> Player_08 <b>0</b></div></div>
+              <div class="match"><div class="team"><span>04</span> Player_04 <b>1</b></div><div class="team winner"><span>05</span> K1ller <b>2</b></div></div>
+              <div class="match"><div class="team winner"><span>02</span> Shadow <b>2</b></div><div class="team"><span>07</span> Player_07 <b>0</b></div></div>
+              <div class="match"><div class="team"><span>03</span> Ghost <b>0</b></div><div class="team winner"><span>06</span> Vortex <b>2</b></div></div>
+            </div>
+            <div class="bracket-round"><h4 data-i18n="semifinals">ПОЛУФИНАЛ</h4>
+              <div class="match"><div class="team winner"><span>01</span> Luks0vix <b>—</b></div><div class="team"><span>05</span> K1ller <b>—</b></div></div>
+              <div class="match"><div class="team"><span>02</span> Shadow <b>—</b></div><div class="team"><span>06</span> Vortex <b>—</b></div></div>
+            </div>
+            <div class="bracket-round final-round"><h4 data-i18n="final">ФИНАЛ</h4><div class="match final-match"><div class="team"><span>?</span> TBD <b>—</b></div><div class="team"><span>?</span> TBD <b>—</b></div></div><div class="champion"><span>♛</span><small data-i18n="champion">ЧЕМПИОН</small><b>—</b></div></div>
+          </div>
+        </div>
+        <div class="bracket-footer"><span><i class="legend-dot"></i><span data-i18n="winner_legend">Победитель матча</span></span><span data-i18n="bracket_note">Сетка показана для демонстрации интерфейса</span></div>
+      </div>
+    </section>
+    <section class="section-wrap how-section" id="how">
+      <div class="section-heading"><div><div class="eyebrow"><span></span><span data-i18n="simple_process">SIMPLE PROCESS</span></div><h2 data-i18n="how_title">ВСЁ <em>ПРОСТО</em></h2></div></div>
+      <div class="steps">
+        <div class="step"><span>01</span><div class="step-icon">◫</div><h3 data-i18n="step1_title">Выбери турнир</h3><p data-i18n="step1_text">Открой страницу турнира и посмотри участников, формат и расписание.</p></div>
+        <div class="step"><span>02</span><div class="step-icon">⌘</div><h3 data-i18n="step2_title">Следи за матчами</h3><p data-i18n="step2_text">Смотри пары игроков, текущие раунды и результаты встреч.</p></div>
+        <div class="step"><span>03</span><div class="step-icon">♛</div><h3 data-i18n="step3_title">Узнай победителя</h3><p data-i18n="step3_text">Следи за продвижением участников и итоговой таблицей.</p></div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer section-wrap" id="results">
+    <a class="brand" href="#"><span class="brand-mark">BS</span><span class="brand-copy">BLOCK STRIKE <b>TOURNAMENTS</b></span></a>
+    <span data-i18n="footer_note">Турниры сообщества Block Strike.</span>
+    <span class="footer-copy">© 2026 BLOCK STRIKE TOURNAMENTS</span>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="script.js"></script>
+</body>
+</html>
