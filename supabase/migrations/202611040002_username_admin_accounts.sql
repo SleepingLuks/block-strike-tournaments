@@ -1,4 +1,6 @@
 -- Username/password administrator accounts; no email or Telegram dependency.
+-- Recreate sessions to migrate away from the previous Telegram-linked schema.
+drop table if exists public.admin_sessions;
 -- Existing public tournament tables are left intact.
 create table if not exists public.admin_accounts (
   id uuid primary key default gen_random_uuid(),
